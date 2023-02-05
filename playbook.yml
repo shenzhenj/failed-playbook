@@ -1,8 +1,6 @@
 ---
 - name: Install Nginx and Docker / other minor tasks
-  connection: docker
   hosts: '*'
-  become: true
   tasks:
     - name: Install required system packages
       apt:
@@ -11,9 +9,7 @@
           - ca-certificates
           - curl
           - software-properties-common
-          - python3-pip
-          - virtualenv
-          - python3-setuptools
+          - gnupg
         state: latest
         update_cache: true
 
@@ -33,11 +29,6 @@
         state: latest
         update_cache: true
 
-    - name: Install Docker Module for Python
-      pip:
-        name: docker
-        update_cache: true
-
     - name: Add user to docker group
       ansible.builtin.user:
         name: USERNAME
@@ -53,7 +44,3 @@
         name: nginx
         state: latest
         update_cache: true
-
-    - name: Echo Nginx version
-      shell:
-        cmd: nginx -v   
