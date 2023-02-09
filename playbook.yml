@@ -1,6 +1,8 @@
 ---
 - name: Install Nginx and Docker / other minor tasks
-  hosts: '*'
+  hosts: 127.0.0.1
+  connection: local
+  become: true
   tasks:
     - name: Install required system packages
       apt:
@@ -12,7 +14,7 @@
           - gnupg
         state: latest
         update_cache: true
-
+ 
     - name: Add Docker GPG apt Key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -31,16 +33,28 @@
 
     - name: Add user to docker group
       ansible.builtin.user:
-        name: USERNAME
+        name: yevhensirenko
         groups: docker
         append: yes
-          
-    - name: Reset ssh connection to allow user changes to affect ansible user
-      ansible.builtin.meta:
-        reset_connection
+
+    - name: Enable and start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true    
 
     - name: Install Nginx
       apt:
         name: nginx
         state: latest
         update_cache: true
+
+    - name: Check Nginx version 
+      ansible.builtin.command:
+        cmd: nginx -v
+      register: nginx_version
+
+    - name: Write Nginx version
+      debug:
+        msg: "{{ nginx_version.stderr }}" 
+
